@@ -20,7 +20,7 @@ use TriStudio\Resource\AbstractResourceConfig;
 {{#vars}}
 {{#items}}
 {{^isPrimitiveType}}
-use {{modelPackage}}\{{datatype}},
+use {{modelPackage}}\{{datatype}};
 {{/isPrimitiveType}}
 {{/items}}
 {{/vars}}
@@ -77,7 +77,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
                 {{^isContainer}}
                 {{^isPrimitiveType}}
                 self::CONFIG_DATA_TYPE => self::DATA_TYPE_RESOURCE_CONFIG,
-                self::CONFIG_RESOURCE_CONFIG => {{datatype}}::getClass(),
+                self::CONFIG_RESOURCE_CONFIG => {{datatype}}ResourceConfig::getClass(),
                 {{/isPrimitiveType}}
                 {{#isPrimitiveType}}
                 self::CONFIG_DATA_TYPE => {{datatype}},
@@ -91,7 +91,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
                 {{/isPrimitiveType}}
                 {{^isPrimitiveType}}
                 self::CONFIG_ARRAY_TYPE => self::DATA_TYPE_RESOURCE_CONFIG,
-                self::CONFIG_RESOURCE_CONFIG => {{datatype}}::getClass(),
+                self::CONFIG_RESOURCE_CONFIG => {{datatype}}ResourceConfig::getClass(),
                 {{/isPrimitiveType}}
                 {{/items}}
                 {{/isContainer}}

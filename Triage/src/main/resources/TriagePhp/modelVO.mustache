@@ -59,7 +59,7 @@ class {{classname}}VO extends AbstractVariableObject
         $this->addProperty(
             {{classname}}ResourceConfig::FIELD_{{name}},
             array(
-                AbstractVariableObject::OPTION_VO_NAME => {{classname}}VO::getClass()
+                AbstractVariableObject::OPTION_VO_NAME => {{datatype}}VO::getClass()
             )
         );
         {{/isPrimitiveType}}

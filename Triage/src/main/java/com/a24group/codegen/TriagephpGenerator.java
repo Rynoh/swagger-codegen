@@ -76,11 +76,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     modelTemplateFiles.put(
       "modelResourceConfig.mustache", // the template to use
       "ResourceConfig.php"// the extension for each file to write
-      );
+    );
     modelTemplateFiles.put(
-            "modelVO.mustache", // the template to use
-            "VO.php"// the extension for each file to write
-            );
+        "modelVO.mustache", // the template to use
+        "VO.php"// the extension for each file to write
+    );
     /**
      * Api classes.  You can write classes for each Api file with the apiTemplateFiles map.
      * as with models, add multiple entries with different extensions for multiple files per
@@ -185,12 +185,13 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
      * are available in models, apis, and supporting files
      */
     additionalProperties.put("apiVersion", apiVersion);
-    additionalProperties.put(CodegenConstants.MODEL_NAME_SUFFIX, SUFFIX_RC);
+//    additionalProperties.put(CodegenConstants.MODEL_NAME_SUFFIX, SUFFIX_RC);
 //    modelPackage = "TriStudio\\Stuff\\Resource";/
     additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
     additionalProperties.put("author", AUTHOR);
     
     /**
+     * TODO What does this do?
      * Supporting Files.  You can write single files for the generator with the
      * entire object tree available.  If the input file has a suffix of `.mustache
      * it will be processed by the template engine.  Otherwise, it will be copied
@@ -289,7 +290,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       if (languageSpecificPrimitives.contains(type))
         return type;
     } else {
-        type = initialCaps(swaggerType) + SUFFIX_RC;
+        type = initialCaps(swaggerType);
     }
     return type;
   }
@@ -317,11 +318,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
    * @param name the name of the model
    * @return capitalized model name
    */
-  @Override
-  public String toModelName(final String name) {
-//      return initialCaps(modelNamePrefix + stripModelFromName(name));
-      return initialCaps(stripModelFromName(name));
-  }
+//  @Override
+//  public String toModelName(final String name) {
+////      return initialCaps(modelNamePrefix + stripModelFromName(name));
+//      return initialCaps(stripModelFromName(name));
+//  }
   
   /**
    * Return the capitalized file name of the model
@@ -329,15 +330,16 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
    * @param name the model name
    * @return the file name of the model
    */
-  @Override
-  public String toModelFilename(String name) {
-//      return initialCaps(modelNamePrefix + stripModelFromName(name) + modelNameSuffix);
-      return initialCaps(stripModelFromName(name));
-  }
+//  @Override
+//  public String toModelFilename(String name) {
+////      return initialCaps(modelNamePrefix + stripModelFromName(name) + modelNameSuffix);
+////      return initialCaps(stripModelFromName(name));
+////      return initialCaps(stripModelFromName(name));
+//  }
   
-  protected String stripModelFromName(String name) {
-      return name.replaceFirst("Model", "");
-  }
+//  protected String stripModelFromName(String name) {
+//      return name.replaceFirst("Model", "");
+//  }
   
   @Override
   public void processOpts() {
