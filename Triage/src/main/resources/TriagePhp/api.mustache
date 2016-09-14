@@ -1,28 +1,127 @@
-
-# This is a sample api mustache template.  It is representing a ficticous 
-# language and won't be usable or compile to anything without lots of changes.
-# Use it as an example.  You can access the variables in the generator object
-# like such:
-
-# use the package from the `apiPackage` variable
-package: {{package}}
-
-# operations block
+<?php
 {{#operations}}
-classname: {{classname}}
-
-# loop over each operation in the API:
 {{#operation}}
+/**
+ * Contains the {{classname}}Endpoint class.
+ *
+ * @category   {{modelPackage}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
 
-# each operation has an `operationId`:
-operationId: {{operationId}}
+/**
+* @namespace
+*/
+namespace {{modelPackage}};
 
-# and parameters:
-{{#allParams}}
-{{paramName}}: {{dataType}}
-{{/allParams}}
+use TriPat\Model\Exception\RuntimeException;
+use TriPat\Resource\AddUserRegisterDevice\AddUserRegisterDeviceResponseVO;
+use TriPat\Resource\ClientErrorVO;
+use TriPat\Resource\ValidationErrorVO;
+use TriPat\Resource\DefaultErrorVO;
 
+/**
+ * Contains the {{classname}}Endpoint class.
+ *
+ * @category   {{modelPackage}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+class {{classname}}Endpoint extends AbstractEndPoint
+{
+
+    /**
+     * The params the end point will use.
+     *
+     * @var array
+     */
+    protected $arrParams = array();
+
+    /**
+     * The relative uri that will identify the endpoint
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return string The uri which has all place holders replaced
+     */
+    public function getUri()
+    {
+        return str_replace(
+            array_keys($this->arrParams),
+            array_values($this->arrParams),
+            '{{path}}'
+        );
+    }
+
+    /**
+     * Getter for the http method for the current endpoint
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return string The http method that will be used
+     */
+    public function getMethod()
+    {
+        return \Zend\Http\Request::METHOD_{{httpMethod}};
+    }
+
+    /**
+     * Setter for the params for the current endpoint
+     *
+     * @param array $arrParams The params
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return void
+     */
+    public function setParams($arrParams)
+    {
+        $this->arrParams = $arrParams;
+    }
+
+    /**
+     * Will deal with the response of the service
+     *
+     * @param \Zend\Http\Response $objResponse The service response
+     *
+     * TODO look into the list() function to remove the zend dependency from here
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @throws \TriStudio\Resource\Exception\ValidatorException
+     * @throws \TriStudio\ServiceManager\Exception\UnresolvedDependencyException
+     *
+     * @return \TriStudio\Resource\VariableObjectInterface The response object
+     */
+    protected function handleResponse(\Zend\Http\Response $objResponse)
+    {
+        $objBody = json_decode($objResponse->getBody());
+        $objResponseVO = null;
+        /** @var \TriStudio\Resource\Helper\VariableObjectFromStdClass $objVoFromStdClass */
+        $objVoFromStdClass = $this->getServiceManager()->get('VariableObjectFromStdClass');
+        switch ($objResponse->getStatusCode()) {
+            {{#responses}}
+            {{#dataType}}
+            {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
+                $data = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '{{dataType}}', $e->getResponseHeaders());
+                $e->setResponseObject($data);
+                break;
+            {{/dataType}}
+            {{/responses}}
+        }
+        return $objResponseVO;
+    }
+
+}
 {{/operation}}
-
-# end of operations block
 {{/operations}}

@@ -1,6 +1,9 @@
 package com.a24group.codegen;
 
 import io.swagger.codegen.*;
+import io.swagger.models.Model;
+import io.swagger.models.Operation;
+import io.swagger.models.Swagger;
 import io.swagger.models.properties.*;
 import io.swagger.util.Json;
 
@@ -21,6 +24,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   protected String invokerPackage = "Swagger\\Client";
   protected String resourceName = "";
   protected String modelDirName = "Model//Resource";
+  protected String apiDirName = "Model//EndPoints";
   protected HashMap<String, String> resourceConfigConstantFieldExceptions = new HashMap<String, String>();
   
   /**
@@ -81,15 +85,18 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
         "modelVO.mustache", // the template to use
         "VO.php"// the extension for each file to write
     );
+    
     /**
      * Api classes.  You can write classes for each Api file with the apiTemplateFiles map.
      * as with models, add multiple entries with different extensions for multiple files per
      * class
      */
-//    apiTemplateFiles.put(
-//      "api.mustache",   // the template to use
-//      ".sample");       // the extension for each file to write
-
+    apiTemplateFiles.put(
+      "api.mustache",   // the template to use
+      "EndPoint.php");
+    // the extension for each file to write
+          // the extension for each file to write
+    
     /**
      * Template Location.  This is the location which templates will be read from.  The generator
      * will use the resource stream to attempt to read the templates.
@@ -99,7 +106,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     /**
      * Api Package.  Optional, if needed, this can be used in templates
      */
-    apiPackage = "io.swagger.client.api";
+    apiPackage = "a24group\\Resource";
 
     /**
      * Model Package.  Optional, if needed, this can be used in templates
@@ -191,7 +198,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     additionalProperties.put("author", AUTHOR);
     
     /**
-     * TODO What does this do?
      * Supporting Files.  You can write single files for the generator with the
      * entire object tree available.  If the input file has a suffix of `.mustache
      * it will be processed by the template engine.  Otherwise, it will be copied
@@ -200,7 +206,14 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       "",                                                       // the destination folder, relative `outputFolder`
       "myFile.sample")                                          // the output file
     );
-
+    supportingFiles.add(new SupportingFile("driver.mustache",   // the input template or file
+         "Model",                                                       // the destination folder, relative `outputFolder`
+         "Driver.php")                                          // the output file
+     );
+    supportingFiles.add(new SupportingFile("client.mustache",   // the input template or file
+        "Model",                                                       // the destination folder, relative `outputFolder`
+        "Client.php")                                          // the output file
+    );
     /**
      * Language Specific Primitives.  These types will not trigger imports by
      * the client generator
@@ -238,7 +251,8 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
    */
   @Override
   public String apiFileFolder() {
-    return outputFolder + "/" + sourceFolder + "/" + apiPackage().replace('.', File.separatorChar);
+      return (outputFolder + "/" + apiDirName);
+//    return outputFolder + "/" + sourceFolder + "/" + apiPackage().replace('.', File.separatorChar);
   }
 
   /**
@@ -405,5 +419,36 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
           }
       }
   }
+ 
+  /**
+   * Convert Swagger Operation object to Codegen Operation object
+   *
+   * hack to uppercase the body params
+   *
+   * @param path the path of the operation
+   * @param httpMethod HTTP method
+   * @param operation Swagger operation object
+   * @param definitions a map of Swagger models
+   * @param swagger a Swagger object representing the spec
+   * @return Codegen Operation object
+   */
+  @Override
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions, Swagger swagger) {
+      CodegenOperation co = super.fromOperation(path, httpMethod, operation, definitions, swagger);
+      
+      List<CodegenParameter> newList = new ArrayList<CodegenParameter>();
+      
+      for (CodegenParameter parameter: co.bodyParams) {
+          parameter.baseType = initialCaps(parameter.baseType);
+          newList.add(parameter);
+      }
+      co.bodyParams = newList;
+      
+      return co;
+  }
   
+  @Override
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
+      return fromOperation(path, httpMethod, operation, definitions, null);
+  }
 }

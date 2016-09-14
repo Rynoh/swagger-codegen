@@ -1,0 +1,68 @@
+<?php
+/**
+ * Contains the {{classname}} class.
+ *
+ * This is a generated class, as this class gets updated as our application needs to add functionality.
+ * An example of this is the ability to pass another VO to a particular method and have it transformed.
+ *
+ * @category {{modelPackage}}
+ * @package  {{modelPackage}}
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{modelPackage}};
+
+use TriPat\Model\EndPoints\AbstractEndPoint;
+use TriStudio\Resource\AbstractVariableObject;
+use {{modelPackage}}\PatClient;
+
+/**
+ * Driver which will transfer our application configuration into the required data for module
+ *
+ * @category {{modelPackage}}
+ * @package  {{modelPackage}}
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+class Driver extends Client
+{
+
+    /**
+     * Apply the required configuration to the object
+     *
+     * @param array $arrConfig The configuration array
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @throws \TriPat\Model\Exception\RuntimeException When driver configuration is invalid
+     *
+     * @return void
+     */
+    public function __construct(array $arrConfig)
+    {
+        if (!array_key_exists('url', $arrConfig) || !array_key_exists('port', $arrConfig)) {
+            throw new \TriPat\Model\Exception\RuntimeException(
+                'Pat Driver details incorrectly configured:' . json_encode($arrConfig),
+                \TriPat\Model\Exception\RuntimeException::UNEXPECTED_DRIVER_CONFIGURATION
+            );
+        }
+
+        $iProtoSplit = strpos($arrConfig['url'], AbstractEndPoint::PROTOCOL_SPLIT);
+        $sProtocol = substr($arrConfig['url'], 0, $iProtoSplit);
+        $sHost = substr($arrConfig['url'], $iProtoSplit + strlen(AbstractEndPoint::PROTOCOL_SPLIT));
+        $arrConfiguration = array(
+            'protocol' => $sProtocol,
+            'host' => $sHost,
+            'port' => $arrConfig['port']
+        );
+        parent::__construct($arrConfiguration);
+    }
+
+}

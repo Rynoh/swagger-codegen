@@ -1,0 +1,124 @@
+<?php
+/**
+ * Contains the {{classname}} class.
+ *
+ * @category {{modelPackage}}
+ * @package  {{modelPackage}}
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{modelPackage}};
+
+use TriStudio\Resource\AbstractVariableObject;
+use TriStudio\ServiceManager\AbstractServiceManagerAwareBase;
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{#bodyParams}}
+use {{modelPackage}}\{{baseType}}VO;
+{{/bodyParams}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+
+/**
+ * The client that will deal with setting the configuration onto the end points before making the service call
+ *
+ * @category {{modelPackage}}
+ * @package  {{modelPackage}}
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+class Client extends AbstractServiceManagerAwareBase
+{
+
+    /**
+     * The base url for the project.
+     *
+     * @var string
+     */
+    protected $sBaseUrl = '/v1';
+
+    /**
+     * The configuration for the object.
+     *
+     * @var array
+     */
+    protected $arrConfig = array();
+
+    /**
+     * Set basic configuration onto the object
+     *
+     * @param array $arrConfig The configuration
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return void
+     */
+    public function __construct(array $arrConfig)
+    {
+        $this->arrConfig = $arrConfig;
+        $this->arrConfig['url_base'] = $this->sBaseUrl;
+    }
+
+    {{#apiInfo}}
+    {{#apis}}
+    {{#operations}}
+    {{#operation}}
+    /**
+     * Will make the required call to the {{classname}}Endpoint
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return \TriStudio\Resource\AbstractVariableObject The response VO
+     */
+    public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}, {{/required}}{{/pathParams}}{{/hasParams}}AbstractVariableObject $objVo)
+    {
+        {{#bodyParams}}
+        if (!$objVo instanceof {{baseType}}VO) {
+            $sMessage = sprintf(
+                'Expected type [%s] but received type [%s] on endpoint [%s]',
+                '{{modelPackage}}\{{paramName}}VO',
+                get_class($objVo),
+                get_class($this)
+            );
+            throw new \TriPat\Model\Exception\RuntimeException(
+                $sMessage,
+                \TriPat\Model\Exception\RuntimeException::UNEXPECTED_ENDPOINT_PAYLOAD_PARAM
+            );
+        }
+        {{/bodyParams}}
+
+        {{^hasParams}}
+        $arrParams = array();
+        {{/hasParams}}
+        {{#hasParams}}
+        $arrParams = array(
+            {{#pathParams}}
+            '{{baseName}}' => ${{baseName}}{{^-last}},{{/-last}}
+            {{/pathParams}}
+        );
+        {{/hasParams}}
+        /** @var {{modelPackage}}\{{classname}}Endpoint $objEndpoint */
+        $objEndpoint = $this->getServiceManager()->get('{{classname}}Endpoint');
+        $objEndpoint->setConfig($this->arrConfig);
+        $objEndpoint->setParams($arrParams);
+        $objEndpoint->setPayload($objVo);
+        return $objEndpoint->send();
+    }
+
+    {{/operation}}
+    {{/operations}}
+    {{/apis}}
+    {{/apiInfo}}
+}
