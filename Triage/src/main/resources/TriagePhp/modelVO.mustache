@@ -1,0 +1,74 @@
+<?php
+{{#models}}
+{{#model}}
+/**
+ * Contains the {{classname}}VO class.
+ *
+ * @category {{modelPackage}};
+ * @package  {{modelPackage}};
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{modelPackage}};
+
+use TriStudio\Resource\AbstractVariableObject;
+
+/**
+ * Contains the {{classname}}VO class.
+ *
+ * @category {{modelPackage}};
+ * @package  {{modelPackage}};
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+class {{classname}}VO extends AbstractVariableObject
+{
+
+    /**
+     * Corresponding resource config for a variable object.
+     *
+     * @var \TriStudio\Resource\AbstractResourceConfig
+     */
+    protected static $objResourceConfig;
+
+    /**
+     * The resource config class name.
+     *
+     * @see \TriStudio\Resource\AbstractVariableObject::$sResourceConfigClassName
+     *
+     * @var string
+     */
+    protected static $sResourceConfigClassName = '{{modelPackage}}\{{classname}}ResourceConfig';
+
+    /**
+     * Set allowed properties for this VO.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     */
+    public function __construct()
+    {
+        {{#vars}}
+        {{^isPrimitiveType}}
+        $this->addProperty(
+            {{classname}}ResourceConfig::FIELD_{{name}},
+            array(
+                AbstractVariableObject::OPTION_VO_NAME => {{classname}}VO::getClass()
+            )
+        );
+        {{/isPrimitiveType}}
+        {{#isPrimitiveType}}
+        $this->addProperty({{classname}}ResourceConfig::FIELD_{{name}});
+        {{/isPrimitiveType}}
+        {{/vars}}
+    }
+
+}
+{{/model}}
+{{/models}}

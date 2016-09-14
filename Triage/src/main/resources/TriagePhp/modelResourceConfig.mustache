@@ -1,0 +1,182 @@
+<?php
+{{#models}}
+{{#model}}
+/**
+ * Contains the {{classname}}ResourceConfig class.
+ *
+ * @category {{modelPackage}};
+ * @package  {{modelPackage}};
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{modelPackage}};
+
+use TriStudio\Resource\AbstractResourceConfig;
+{{#vars}}
+{{#items}}
+{{^isPrimitiveType}}
+use {{modelPackage}}\{{datatype}},
+{{/isPrimitiveType}}
+{{/items}}
+{{/vars}}
+
+/**
+ * Contains the {{classname}}ResourceConfig class.
+ *
+ * @category {{modelPackage}};
+ * @package  {{modelPackage}};
+ *
+ * @author   {{{author}}}
+ * @since    23 May 2016
+ */
+class {{classname}}ResourceConfig extends AbstractResourceConfig
+{
+    /**
+     * The resource name
+     *
+     * @var string
+     */
+    const RESOURCE_NAME = '{{classname}}';
+
+    /**#@+
+     * Property names.
+     *
+     * @var string
+     */
+    {{#vars}}
+    const FIELD_{{name}} = '{{baseName}}';
+    {{/vars}}
+    /**#@-*/
+
+    /**
+     * Add property configs to this resource config.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        // configure the primary key
+        $this->setPrimaryKeyConfig(
+            array(
+                self::CONFIG_DATA_TYPE => self::PRIMARYKEY_DATA_TYPE_DEFAULT,
+                self::CONFIG_VALIDATORS => array(),
+            )
+        );
+        {{#vars}}
+        $this->addPropertyConfig(
+            self::FIELD_{{name}},
+            array(
+                {{^isContainer}}
+                {{^isPrimitiveType}}
+                self::CONFIG_DATA_TYPE => self::DATA_TYPE_RESOURCE_CONFIG,
+                self::CONFIG_RESOURCE_CONFIG => {{datatype}}::getClass(),
+                {{/isPrimitiveType}}
+                {{#isPrimitiveType}}
+                self::CONFIG_DATA_TYPE => {{datatype}},
+                {{/isPrimitiveType}}
+                {{/isContainer}}
+                {{#isContainer}}
+                self::CONFIG_DATA_TYPE => {{datatype}},
+                {{#items}}
+                {{#isPrimitiveType}}
+                self::CONFIG_ARRAY_TYPE => {{datatype}},
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+                self::CONFIG_ARRAY_TYPE => self::DATA_TYPE_RESOURCE_CONFIG,
+                self::CONFIG_RESOURCE_CONFIG => {{datatype}}::getClass(),
+                {{/isPrimitiveType}}
+                {{/items}}
+                {{/isContainer}}
+                self::CONFIG_SHORT_NAME => self::FIELD_{{name}},
+                {{#isInteger}}
+                {{#minimum}}
+                {{#maximum}}
+                self::CONFIG_VALIDATORS => array(
+                    'Digits' => array(
+                        'minValue' => {{minimum}},
+                        'maxValue' => {{maximum}}
+                    )
+                ),
+                {{/maximum}}
+                {{^maximum}}
+                self::CONFIG_VALIDATORS => array(
+                    'Digits' => array(
+                       'minValue' => {{minimum}}
+                    )
+                ),
+                {{/maximum}}
+                {{/minimum}}
+                {{#maximum}}
+                {{^minimum}}
+                self::CONFIG_VALIDATORS => array(
+                    'Digits' => array(
+                        'maxValue' => {{maximum}}
+                    )
+                ),
+                {{/minimum}}
+                {{/maximum}}
+                {{/isInteger}}
+                {{#isString}}
+                {{^isEnum}}
+                {{#minLength}}
+                {{#maxLength}}
+                self::CONFIG_VALIDATORS => array(
+                    'StringLength' => array(
+                        'min' => '{{minLength}}',
+                        'max' => '{{maxLength}}'
+                    )
+                ),
+                {{/maxLength}}
+                {{^maxLength}}
+                self::CONFIG_VALIDATORS => array(
+                    'StringLength' => array(
+                        'min' => '{{minLength}}'
+                    )
+                ),
+                {{/maxLength}}
+                {{/minLength}}
+                {{#maxLength}}
+                {{^minLength}}
+                self::CONFIG_VALIDATORS => array(
+                    'StringLength' => array(
+                        'max' => '{{maxLength}}'
+                    )
+                ),
+                {{/minLength}}
+                {{/maxLength}}
+                {{/isEnum}}
+                {{#isEnum}}
+                {{#allowableValues}}
+                self::CONFIG_VALIDATORS => array(
+                    'EnumValidator' => array(
+                        'haystack' => array(
+                            {{#values}}
+                            '{{{this}}}'{{^-last}},{{/-last}}
+                            {{/values}}
+                        )
+                    )
+                ),
+                {{/allowableValues}}
+                {{/isEnum}}
+                {{/isString}}
+                {{#required}}
+                self::CONFIG_REQUIRED => true
+                {{/required}}
+                {{^required}}
+                self::CONFIG_REQUIRED => false
+                {{/required}}
+            )
+        );
+        {{/vars}}
+    }
+}
+{{/model}}
+{{/models}}
