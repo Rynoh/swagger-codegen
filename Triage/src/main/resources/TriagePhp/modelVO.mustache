@@ -4,8 +4,8 @@
 /**
  * Contains the {{classname}}VO class.
  *
- * @category {{modelPackage}};
- * @package  {{modelPackage}};
+ * @category {{resourcePackage}};
+ * @package  {{resourcePackage}};
  *
  * @author   {{{author}}}
  * @since    23 May 2016
@@ -14,15 +14,15 @@
 /**
  * @namespace
  */
-namespace {{modelPackage}};
+namespace {{resourcePackage}};
 
 use TriStudio\Resource\AbstractVariableObject;
 
 /**
  * Contains the {{classname}}VO class.
  *
- * @category {{modelPackage}};
- * @package  {{modelPackage}};
+ * @category {{resourcePackage}};
+ * @package  {{resourcePackage}};
  *
  * @author   {{{author}}}
  * @since    23 May 2016
@@ -56,15 +56,25 @@ class {{classname}}VO extends AbstractVariableObject
     {
         {{#vars}}
         {{^isPrimitiveType}}
+        {{^isContainer}}
         $this->addProperty(
-            {{classname}}ResourceConfig::FIELD_{{name}},
+            {{classname}}ResourceConfig::FIELD_{{name.toUpperCase}},
             array(
                 AbstractVariableObject::OPTION_VO_NAME => {{datatype}}VO::getClass()
             )
         );
+        {{/isContainer}}
+        {{#isContainer}}
+        $this->addProperty(
+            {{classname}}ResourceConfig::FIELD_{{name.toUpperCase}},
+            array(
+                AbstractVariableObject::OPTION_VO_NAME => {{#items}}{{datatype}}{{/items}}VO::getClass()
+            )
+        );
+        {{/isContainer}}
         {{/isPrimitiveType}}
         {{#isPrimitiveType}}
-        $this->addProperty({{classname}}ResourceConfig::FIELD_{{name}});
+        $this->addProperty({{classname}}ResourceConfig::FIELD_{{name.toUpperCase}});
         {{/isPrimitiveType}}
         {{/vars}}
     }

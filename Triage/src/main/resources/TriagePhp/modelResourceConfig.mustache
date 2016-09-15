@@ -4,8 +4,8 @@
 /**
  * Contains the {{classname}}ResourceConfig class.
  *
- * @category {{modelPackage}};
- * @package  {{modelPackage}};
+ * @category {{resourcePackage}};
+ * @package  {{resourcePackage}};
  *
  * @author   {{{author}}}
  * @since    23 May 2016
@@ -14,7 +14,7 @@
 /**
  * @namespace
  */
-namespace {{modelPackage}};
+namespace {{resourcePackage}};
 
 use TriStudio\Resource\AbstractResourceConfig;
 {{#vars}}
@@ -28,16 +28,17 @@ use {{modelPackage}}\{{datatype}};
 /**
  * Contains the {{classname}}ResourceConfig class.
  *
- * @category {{modelPackage}};
- * @package  {{modelPackage}};
+ * @category {{resourcePackage}};
+ * @package  {{resourcePackage}};
  *
  * @author   {{{author}}}
  * @since    23 May 2016
  */
 class {{classname}}ResourceConfig extends AbstractResourceConfig
 {
+
     /**
-     * The resource name
+     * The resource name.
      *
      * @var string
      */
@@ -49,9 +50,25 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
      * @var string
      */
     {{#vars}}
-    const FIELD_{{name}} = '{{baseName}}';
+    const FIELD_{{name.toUpperCase}} = '{{baseName}}';
     {{/vars}}
     /**#@-*/
+    {{#vars}}
+    {{#isEnum}}
+
+    /**#@+
+     * Enum values.
+     *
+     * @var string
+     */
+    {{#allowableValues}}
+    {{#values}}
+    const ENUM_{{{this.toUpperCase}}} = '{{{this}}}';
+    {{/values}}
+    {{/allowableValues}}
+    /**#@-*/
+    {{/isEnum}}
+    {{/vars}}
 
     /**
      * Add property configs to this resource config.
@@ -72,7 +89,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
         );
         {{#vars}}
         $this->addPropertyConfig(
-            self::FIELD_{{name}},
+            self::FIELD_{{name.toUpperCase}},
             array(
                 {{^isContainer}}
                 {{^isPrimitiveType}}
@@ -95,7 +112,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
                 {{/isPrimitiveType}}
                 {{/items}}
                 {{/isContainer}}
-                self::CONFIG_SHORT_NAME => self::FIELD_{{name}},
+                self::CONFIG_SHORT_NAME => self::FIELD_{{name.toUpperCase}},
                 {{#isInteger}}
                 {{#minimum}}
                 {{#maximum}}
@@ -159,7 +176,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
                     'EnumValidator' => array(
                         'haystack' => array(
                             {{#values}}
-                            '{{{this}}}'{{^-last}},{{/-last}}
+                            self::ENUM_{{{this.toUpperCase}}}{{^-last}},{{/-last}}
                             {{/values}}
                         )
                     )

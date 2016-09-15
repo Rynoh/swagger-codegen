@@ -1,0 +1,42 @@
+<?php
+/**
+ * Contains the RuntimeException class.
+ *
+ * @category   {{exceptionCategory}}
+ * @package    {{exceptionPackage}}
+ * @subpackage {{exceptionSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{exceptionSubPackage}};
+
+use TriStudio\Resource\VariableObjectInterface;
+
+/**
+ * Contains the RuntimeException class.
+ *
+ * @category   {{exceptionCategory}}
+ * @package    {{exceptionPackage}}
+ * @subpackage {{exceptionSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ *
+ * @codeRange  xxxx - xxxx
+ */
+class RuntimeException extends \RuntimeException implements \{{exceptionSubPackage}}\ExceptionInterface
+{
+
+    /**
+     * Code for when the payload param of an endpoint is not correct.
+     *
+     * @var integer
+     */
+    const UNEXPECTED_ENDPOINT_PAYLOAD_PARAM = 0000;
+
+}

@@ -4,9 +4,9 @@
 /**
  * Contains the {{classname}}Endpoint class.
  *
- * @category   {{modelPackage}}
- * @package    {{modelPackage}}
- * @subpackage {{modelPackage}}
+ * @category   {{apiCategory}}
+ * @package    {{apiPackage}}
+ * @subpackage {{apiSubPackage}}
  *
  * @author     {{{author}}}
  * @since      23 May 2016
@@ -15,16 +15,19 @@
 /**
  * @namespace
  */
-namespace {{modelPackage}};
+namespace {{apiSubPackage}};
 
-use {{modelPackage}}\AbstractEndPoint;
+use {{apiPackage}}\AbstractEndPoint;
+{{#responses}}
+use {{resourcePackage}}\{{dataType}}VO;
+{{/responses}}
 
 /**
  * Contains the {{classname}}Endpoint class.
  *
- * @category   {{modelPackage}}
- * @package    {{modelPackage}}
- * @subpackage {{modelPackage}}
+ * @category   {{apiCategory}}
+ * @package    {{apiPackage}}
+ * @subpackage {{apiSubPackage}}
  *
  * @author     {{{author}}}
  * @since      23 May 2016
@@ -94,8 +97,7 @@ class {{classname}}Endpoint extends AbstractEndPoint
      * @author {{{author}}}
      * @since  23 May 2016
      *
-     * @throws \TriStudio\Resource\Exception\ValidatorException
-     * @throws \TriStudio\ServiceManager\Exception\UnresolvedDependencyException
+     * @throws \{{exceptionSubPackage}}\RuntimeException
      *
      * @return \TriStudio\Resource\VariableObjectInterface The response object
      */
@@ -111,7 +113,7 @@ class {{classname}}Endpoint extends AbstractEndPoint
             {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
                 $objVO = $objVoFromStdClass->populate(new {{dataType}}VO(), $objBody);
                 {{^isSuccess}}
-                $objExceptionVO = new {{modelPackage}}\RuntimeException();
+                $objExceptionVO = new \{{exceptionSubPackage}}\RuntimeException();
                 $objExceptionVO->setErrorObject($objVO);
                 throw $objExceptionVO;
                 {{/isSuccess}}

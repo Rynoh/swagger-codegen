@@ -2,7 +2,7 @@
 /**
  * Contains the Client class.
  *
- * @category {{modelPackage}}
+ * @category {{modelCategory}}
  * @package  {{modelPackage}}
  *
  * @author   {{{author}}}
@@ -21,7 +21,7 @@ use TriStudio\ServiceManager\AbstractServiceManagerAwareBase;
 {{#operations}}
 {{#operation}}
 {{#bodyParams}}
-use {{modelPackage}}\{{baseType}}VO;
+use {{resourcePackage}}\{{baseType}}VO;
 {{/bodyParams}}
 {{/operation}}
 {{/operations}}
@@ -31,7 +31,7 @@ use {{modelPackage}}\{{baseType}}VO;
 /**
  * The client that will deal with setting the configuration onto the end points before making the service call
  *
- * @category {{modelPackage}}
+ * @category {{modelCategory}}
  * @package  {{modelPackage}}
  *
  * @author   {{{author}}}
@@ -85,16 +85,16 @@ class Client extends AbstractServiceManagerAwareBase
     public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}, {{/required}}{{/pathParams}}{{/hasParams}}AbstractVariableObject $objVo)
     {
         {{#bodyParams}}
-        if (!$objVo instanceof {{baseType}}VO) {
+        if (!$objVo instanceof {{#initialCaps}}{{baseType}}{{/initialCaps}}VO) {
             $sMessage = sprintf(
                 'Expected type [%s] but received type [%s] on endpoint [%s]',
                 '{{modelPackage}}\{{paramName}}VO',
                 get_class($objVo),
                 get_class($this)
             );
-            throw new \TriPat\Model\Exception\RuntimeException(
+            throw new \{{exceptionSubPackage}}\RuntimeException(
                 $sMessage,
-                \TriPat\Model\Exception\RuntimeException::UNEXPECTED_ENDPOINT_PAYLOAD_PARAM
+                \{{exceptionSubPackage}}\RuntimeException::UNEXPECTED_ENDPOINT_PAYLOAD_PARAM
             );
         }
         {{/bodyParams}}
