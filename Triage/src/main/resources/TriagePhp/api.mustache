@@ -13,15 +13,11 @@
  */
 
 /**
-* @namespace
-*/
+ * @namespace
+ */
 namespace {{modelPackage}};
 
-use TriPat\Model\Exception\RuntimeException;
-use TriPat\Resource\AddUserRegisterDevice\AddUserRegisterDeviceResponseVO;
-use TriPat\Resource\ClientErrorVO;
-use TriPat\Resource\ValidationErrorVO;
-use TriPat\Resource\DefaultErrorVO;
+use {{modelPackage}}\AbstractEndPoint;
 
 /**
  * Contains the {{classname}}Endpoint class.
@@ -113,13 +109,17 @@ class {{classname}}Endpoint extends AbstractEndPoint
             {{#responses}}
             {{#dataType}}
             {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
-                $data = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '{{dataType}}', $e->getResponseHeaders());
-                $e->setResponseObject($data);
+                $objVO = $objVoFromStdClass->populate(new {{dataType}}VO(), $objBody);
+                {{^isSuccess}}
+                $objExceptionVO = new {{modelPackage}}\RuntimeException();
+                $objExceptionVO->setErrorObject($objVO);
+                throw $objExceptionVO;
+                {{/isSuccess}}
                 break;
             {{/dataType}}
             {{/responses}}
         }
-        return $objResponseVO;
+        return $objVO;
     }
 
 }

@@ -1,21 +1,40 @@
 package com.a24group.codegen;
 
-import io.swagger.codegen.*;
+import io.swagger.codegen.CodegenConfig;
+import io.swagger.codegen.CodegenConstants;
+import io.swagger.codegen.CodegenModelFactory;
+import io.swagger.codegen.CodegenModelType;
+import io.swagger.codegen.CodegenOperation;
+import io.swagger.codegen.CodegenParameter;
+import io.swagger.codegen.CodegenProperty;
+import io.swagger.codegen.CodegenResponse;
+import io.swagger.codegen.CodegenType;
+import io.swagger.codegen.DefaultCodegen;
+import io.swagger.codegen.SupportingFile;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
-import io.swagger.models.properties.*;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.Property;
 import io.swagger.util.Json;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.a24group.codegen.TriagePhpCodegenResponse;
 
 public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig {
 
   // source folder where to write the files
   public String myName = "Ryno Hartzer";
-    
+
   protected String sourceFolder = "src";
   protected String apiVersion = "1.0.0";
   final protected String SUFFIX_VO = "VO";
@@ -26,10 +45,10 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   protected String modelDirName = "Model//Resource";
   protected String apiDirName = "Model//EndPoints";
   protected HashMap<String, String> resourceConfigConstantFieldExceptions = new HashMap<String, String>();
-  
+
   /**
    * Configures the type of generator.
-   * 
+   *
    * @return  the CodegenType for this generator
    * @see     io.swagger.codegen.CodegenType
    */
@@ -40,7 +59,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   /**
    * Configures a friendly name for the generator.  This will be used by the generator
    * to select the library with the -l flag.
-   * 
+   *
    * @return the friendly name for the generator
    */
   public String getName() {
@@ -50,7 +69,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   /**
    * Returns human-friendly help for the generator.  Provide the consumer with help
    * tips, parameters here
-   * 
+   *
    * @return A string value for the help message
    */
   public String getHelp() {
@@ -60,10 +79,12 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   public TriagephpGenerator() {
     super();
 
+    CodegenModelFactory.setTypeMapping(CodegenModelType.RESPONSE, TriagePhpCodegenResponse.class);
+
     // Create a list of exceptions for constant naming
     resourceConfigConstantFieldExceptions.put("__v", "version");
     resourceConfigConstantFieldExceptions.put("_id", "id");
-    
+
     // clear import mapping (from default generator) as php does not use it
     // at the moment
     importMapping.clear();
@@ -85,7 +106,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
         "modelVO.mustache", // the template to use
         "VO.php"// the extension for each file to write
     );
-    
+
     /**
      * Api classes.  You can write classes for each Api file with the apiTemplateFiles map.
      * as with models, add multiple entries with different extensions for multiple files per
@@ -94,9 +115,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     apiTemplateFiles.put(
       "api.mustache",   // the template to use
       "EndPoint.php");
-    // the extension for each file to write
-          // the extension for each file to write
-    
+
     /**
      * Template Location.  This is the location which templates will be read from.  The generator
      * will use the resource stream to attempt to read the templates.
@@ -114,24 +133,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     modelPackage = "a24group\\Resource";
 
     // ref: http://php.net/manual/en/language.types.intro.php
-//    languageSpecificPrimitives = new HashSet<String>(
-//        Arrays.asList(
-//            "bool",
-//            "boolean",
-//            "int",
-//            "integer",
-//            "double",
-//            "float",
-//            "string",
-//            "object",
-//            "DateTime",
-//            "mixed",
-//            "number",
-//            "void",
-//            "byte"
-//        )
-//    );
-
     languageSpecificPrimitives = new HashSet<String>(
         Arrays.asList(
             "bool",
@@ -153,20 +154,20 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
             "self::DATA_TYPE_FLOAT"
         )
     );
-    
+
     instantiationTypes.put("array", "array");
     instantiationTypes.put("map", "map");
-    
+
     setReservedWordsLowerCase(
         Arrays.asList(
             // local variables used in api methods (endpoints)
             "resourcePath", "httpBody", "queryParams", "headerParams",
             "formParams", "_header_accept", "_tempBody",
-    
+
             // PHP reserved words
             "__halt_compiler", "abstract", "and", "array", "as", "break", "callable", "case", "catch", "class", "clone", "const", "continue", "declare", "default", "die", "do", "echo", "else", "elseif", "empty", "enddeclare", "endfor", "endforeach", "endif", "endswitch", "endwhile", "eval", "exit", "extends", "final", "for", "foreach", "function", "global", "goto", "if", "implements", "include", "include_once", "instanceof", "insteadof", "interface", "isset", "list", "namespace", "new", "or", "print", "private", "protected", "public", "require", "require_once", "return", "static", "switch", "throw", "trait", "try", "unset", "use", "var", "while", "xor")
     );
-    
+
     // ref: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
     typeMapping = new HashMap<String, String>();
     typeMapping.put("integer", "self::DATA_TYPE_INTEGER");
@@ -186,17 +187,15 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     typeMapping.put("object", "NOT_SUPPORTED");
     typeMapping.put("binary", "string");
     typeMapping.put("UUID", "self::DATA_TYPE_STRING");
-    
+
     /**
      * Additional Properties.  These values can be passed to the templates and
      * are available in models, apis, and supporting files
      */
     additionalProperties.put("apiVersion", apiVersion);
-//    additionalProperties.put(CodegenConstants.MODEL_NAME_SUFFIX, SUFFIX_RC);
-//    modelPackage = "TriStudio\\Stuff\\Resource";/
     additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
     additionalProperties.put("author", AUTHOR);
-    
+//    additionalProperties.put("getVO", new GetResponseTypeLambda());
     /**
      * Supporting Files.  You can write single files for the generator with the
      * entire object tree available.  If the input file has a suffix of `.mustache
@@ -228,7 +227,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   /**
    * Escapes a reserved word as defined in the `reservedWords` array. Handle escaping
    * those terms here.  This logic is only called if a variable matches the reseved words
-   * 
+   *
    * @return the escaped term
    */
   @Override
@@ -244,7 +243,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       return (outputFolder + "/" + modelDirName);
 //    return outputFolder + "/" + sourceFolder + "/" + modelPackage().replace('.', File.separatorChar);
   }
-  
+
   /**
    * Location to write api files.  You can use the apiPackage() as defined when the class is
    * instantiated
@@ -267,8 +266,8 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
         System.out.println("This is instance of ArrayProperty!!!!");
       ArrayProperty ap = (ArrayProperty) p;
       Property inner = ap.getItems();
-      
-      
+
+
       String innerMappingType = null;
       // TODO This is the embedded type getTypeDeclaration(inner)
 
@@ -287,7 +286,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   }
 
   /**
-   * Optional - swagger type conversion.  This is used to map swagger types in a `Property` into 
+   * Optional - swagger type conversion.  This is used to map swagger types in a `Property` into
    * either language specific types via `typeMapping` or into complex models if there is not a mapping.
    *
    * @return a string value of the type or complex model for this property
@@ -308,11 +307,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     }
     return type;
   }
-  
+
   protected String varNameToUppercase(String varName) {
       return varName.toUpperCase();
   }
-  
+
   /**
    * @todo broken and bad name
    * @param varName
@@ -322,10 +321,10 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       if (resourceConfigConstantFieldExceptions.containsKey(varName)) {
           varName = resourceConfigConstantFieldExceptions.get(resourceConfigConstantFieldExceptions);
       }
-      
+
       return varNameToUppercase(varName);
   }
-  
+
   /**
    * Output the proper model name (capitalized)
    *
@@ -337,7 +336,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 ////      return initialCaps(modelNamePrefix + stripModelFromName(name));
 //      return initialCaps(stripModelFromName(name));
 //  }
-  
+
   /**
    * Return the capitalized file name of the model
    *
@@ -350,16 +349,16 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 ////      return initialCaps(stripModelFromName(name));
 ////      return initialCaps(stripModelFromName(name));
 //  }
-  
+
 //  protected String stripModelFromName(String name) {
 //      return name.replaceFirst("Model", "");
 //  }
-  
+
   @Override
   public void processOpts() {
       super.processOpts();
   }
-  
+
   /**
    * Convert Swagger Property object to Codegen Property object
    * TODO THIS IS A HACK!
@@ -370,15 +369,15 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   @Override
   public CodegenProperty fromProperty(String name, Property p) {
       CodegenProperty cp = super.fromProperty(name, p);
-      
+
       if (resourceConfigConstantFieldExceptions.containsKey(cp.name)) {
           cp.name = resourceConfigConstantFieldExceptions.get(cp.name);
       }
-      
+
       cp.name = cp.name.toUpperCase();
       return cp;
   }
-  
+
   @Override
   protected void updatePropertyForArray(CodegenProperty property, CodegenProperty innerProperty) {
       if (innerProperty == null) {
@@ -395,7 +394,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
                         innerProperty.isPrimitiveType = true;
                     }
                 }
-                
+
                 if (!property.isPrimitiveType) {
                     property.complexType = innerProperty.baseType;
                 }
@@ -419,11 +418,13 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
           }
       }
   }
- 
+
   /**
    * Convert Swagger Operation object to Codegen Operation object
    *
-   * hack to uppercase the body params
+   * hack to uppercase the body params base type
+   *
+   * TODO Use lambda to replace this!
    *
    * @param path the path of the operation
    * @param httpMethod HTTP method
@@ -435,20 +436,60 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   @Override
   public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions, Swagger swagger) {
       CodegenOperation co = super.fromOperation(path, httpMethod, operation, definitions, swagger);
-      
+
       List<CodegenParameter> newList = new ArrayList<CodegenParameter>();
-      
+
       for (CodegenParameter parameter: co.bodyParams) {
           parameter.baseType = initialCaps(parameter.baseType);
           newList.add(parameter);
       }
+
       co.bodyParams = newList;
-      
       return co;
   }
-  
+
+  /**
+   * Convert Swagger Response object to Codegen Response object
+   *
+   * @param responseCode HTTP response code
+   * @param response Swagger Response object
+   * @return Codegen Response object
+   */
   @Override
-  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
-      return fromOperation(path, httpMethod, operation, definitions, null);
+  public CodegenResponse fromResponse(String responseCode, Response response) {
+      CodegenResponse r = super.fromResponse(responseCode, response);
+
+      TriagePhpCodegenResponse tr = (TriagePhpCodegenResponse) r;
+
+      tr.isSuccess = false;
+      if (!responseCode.equals("default")) {
+          int statusCode = Integer.parseInt(responseCode);
+          if (statusCode >= 200 && statusCode < 300) {
+              tr.isSuccess = true;
+          }
+      }
+
+      return tr;
   }
+
+//  private static class GetResponseTypeLambda extends TriageCustomLambda {
+//      @Override
+//      public String getResonseVoType(String code) {
+//          if (code.equals("201")) {
+//              return "THIS_IS_SUCCESS_VO";
+//          }
+//          return "FAILURE_VO";
+//      }
+//  }
+//
+//  private static abstract class TriageCustomLambda implements Mustache.Lambda {
+//      @Override
+//      public void execute(Template.Fragment frag, Writer out) throws IOException {
+//          final StringWriter tempWriter = new StringWriter();
+//          frag.execute(tempWriter);
+//          out.write(getResonseVoType(tempWriter.toString()));
+//      }
+//
+//      public abstract String getResonseVoType(String code);
+//  }
 }
