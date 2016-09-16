@@ -114,7 +114,7 @@ class Client extends AbstractServiceManagerAwareBase
         $objEndpoint->setConfig($this->arrConfig);
         $objEndpoint->setParams($arrParams);
         $objEndpoint->setPayload($objVo);
-        return $objEndpoint->send();
+        return $objEndpoint->{{operationId}}();
     }
 
     {{/operation}}

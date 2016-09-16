@@ -1,6 +1,4 @@
 <?php
-{{#operations}}
-{{#operation}}
 /**
  * Contains the {{classname}}Endpoint class.
  *
@@ -18,9 +16,9 @@
 namespace {{apiSubPackage}};
 
 use {{apiPackage}}\AbstractEndPoint;
-{{#responses}}
-use {{resourcePackage}}\{{dataType}}VO;
-{{/responses}}
+{{#imports}}
+use {{import}}VO;
+{{/imports}}
 
 /**
  * Contains the {{classname}}Endpoint class.
@@ -43,36 +41,6 @@ class {{classname}}Endpoint extends AbstractEndPoint
     protected $arrParams = array();
 
     /**
-     * The relative uri that will identify the endpoint
-     *
-     * @author {{{author}}}
-     * @since  23 May 2016
-     *
-     * @return string The uri which has all place holders replaced
-     */
-    public function getUri()
-    {
-        return str_replace(
-            array_keys($this->arrParams),
-            array_values($this->arrParams),
-            '{{path}}'
-        );
-    }
-
-    /**
-     * Getter for the http method for the current endpoint
-     *
-     * @author {{{author}}}
-     * @since  23 May 2016
-     *
-     * @return string The http method that will be used
-     */
-    public function getMethod()
-    {
-        return \Zend\Http\Request::METHOD_{{httpMethod}};
-    }
-
-    /**
      * Setter for the params for the current endpoint
      *
      * @param array $arrParams The params
@@ -87,22 +55,25 @@ class {{classname}}Endpoint extends AbstractEndPoint
         $this->arrParams = $arrParams;
     }
 
-    /**
-     * Will deal with the response of the service
-     *
-     * @param \Zend\Http\Response $objResponse The service response
-     *
-     * TODO look into the list() function to remove the zend dependency from here
-     *
-     * @author {{{author}}}
-     * @since  23 May 2016
-     *
-     * @throws \{{exceptionSubPackage}}\RuntimeException
-     *
-     * @return \TriStudio\Resource\VariableObjectInterface The response object
-     */
-    protected function handleResponse(\Zend\Http\Response $objResponse)
+    {{#operations}}
+    {{#operation}}
+    public function {{operationId}}()
     {
+        {{#pathParams}}
+        {{#-last}}
+        $sUrl = $this->replacePathToken(
+            '{{path}}',
+            $this->arrParams
+        );
+        $sUrl = $this->getAbsoluteUri($sUrl);
+        {{/-last}}
+        {{/pathParams}}
+        {{^pathParams}}
+        $sUrl = $this->getAbsoluteUri('{{path}}');
+        {{/pathParams}}
+
+        $objResponse = $this->send($sUrl, \Zend\Http\Request::METHOD_{{httpMethod}});
+
         $objBody = json_decode($objResponse->getBody());
         $objResponseVO = null;
         /** @var \TriStudio\Resource\Helper\VariableObjectFromStdClass $objVoFromStdClass */
@@ -111,7 +82,7 @@ class {{classname}}Endpoint extends AbstractEndPoint
             {{#responses}}
             {{#dataType}}
             {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
-                $objVO = $objVoFromStdClass->populate(new {{dataType}}VO(), $objBody);
+                $objVO = $objVoFromStdClass->populate(new {{baseType}}VO(), $objBody);
                 {{^isSuccess}}
                 $objExceptionVO = new \{{exceptionSubPackage}}\RuntimeException();
                 $objExceptionVO->setErrorObject($objVO);
@@ -124,6 +95,7 @@ class {{classname}}Endpoint extends AbstractEndPoint
         return $objVO;
     }
 
+    {{/operation}}
+    {{/operations}}
 }
-{{/operation}}
-{{/operations}}
+

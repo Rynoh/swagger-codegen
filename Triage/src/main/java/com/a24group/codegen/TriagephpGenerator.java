@@ -4,12 +4,16 @@ import io.swagger.codegen.CodegenConfig;
 import io.swagger.codegen.CodegenConstants;
 import io.swagger.codegen.CodegenModelFactory;
 import io.swagger.codegen.CodegenModelType;
+import io.swagger.codegen.CodegenOperation;
 import io.swagger.codegen.CodegenProperty;
 import io.swagger.codegen.CodegenResponse;
 import io.swagger.codegen.CodegenType;
 import io.swagger.codegen.DefaultCodegen;
 import io.swagger.codegen.SupportingFile;
+import io.swagger.models.Model;
+import io.swagger.models.Operation;
 import io.swagger.models.Response;
+import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
@@ -21,11 +25,11 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.a24group.codegen.TriagePhpCodegenResponse;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
 
@@ -85,9 +89,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     resourceConfigConstantFieldExceptions.put("__v", "version");
     resourceConfigConstantFieldExceptions.put("_id", "id");
 
-    // clear import mapping (from default generator) as php does not use it
-    // at the moment
-    importMapping.clear();
     supportsInheritance = true;
     // set the output folder here TODO FIX THE OUTPUT FOLDER!!
     outputFolder = "TriageGen\\src\\a24group\\codegen";
@@ -154,7 +155,8 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
             "self::DATA_TYPE_INTEGER",
             "self::DATA_TYPE_STRING",
             "self::DATA_TYPE_BOOLEAN",
-            "self::DATA_TYPE_FLOAT"
+            "self::DATA_TYPE_FLOAT",
+            "null"
         )
     );
 
@@ -219,6 +221,12 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     supportingFiles.add(new SupportingFile("driver.mustache", "Model", "Driver.php"));
     supportingFiles.add(new SupportingFile("client.mustache", "Model", "Client.php"));
     supportingFiles.add(new SupportingFile("runtime_exception.mustache", "Model\\Exception", "RuntimeException.php"));
+  }
+
+  @Override
+  public String apiFilename(String templateName, String tag) {
+      String suffix = apiTemplateFiles().get(templateName);
+      return apiFileFolder() + '/' + toApiFilename(tag) + suffix;
   }
 
   /**
@@ -342,6 +350,47 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
           }
       }
       return tr;
+  }
+
+  /**
+   * Convert Swagger Operation object to Codegen Operation object
+   *
+   * @param path the path of the operation
+   * @param httpMethod HTTP method
+   * @param operation Swagger operation object
+   * @param definitions a map of Swagger models
+   * @param swagger a Swagger object representing the spec
+   * @return Codegen Operation object
+   */
+  @Override
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions, Swagger swagger) {
+      CodegenOperation co = super.fromOperation(path, httpMethod, operation, definitions, swagger);
+      co.imports.clear();
+      blah(co);
+      return co;
+  }
+
+  public void blah(CodegenOperation operation) {
+      for (CodegenResponse response: operation.responses) {
+          if (
+              response.baseType != null &&
+              !defaultIncludes.contains(response.baseType) &&
+              !languageSpecificPrimitives.contains(response.baseType)
+          ) {
+              operation.imports.add(resourcePackage + "\\" + response.baseType);
+          }
+      }
+  }
+
+  /**
+   * Return the fully-qualified "Model" name for import
+   *
+   * @param name the name of the "Model"
+   * @return the fully-qualified "Model" name for import
+   */
+  @Override
+  public String toModelImport(String name) {
+      return name;
   }
 
   private static class InitialCapsLambda extends TriageCustomLambda {
