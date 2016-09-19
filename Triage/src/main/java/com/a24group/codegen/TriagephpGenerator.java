@@ -38,13 +38,15 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   protected String sourceFolder = "src";
   protected String apiVersion = "1.0.0";
   final protected String AUTHOR = "Code Gen <code.gen@a24testmail.com>";
-  protected String exceptionCategory = "";
-  protected String exceptionPackage = "";
-  protected String exceptionSubPackage = "";
-  protected String modelCategory = "";
+  protected String moduleName = "a24GroupModule";
+  protected String driverName = "a24GroupDriver";
   protected String modelDirName = "Model//Resource";
-  protected String apiDirName = "Model//EndPoints";
+  protected String apiDirName = "Model//EndPoint";
+  protected String modelSubPackage = "";
   protected String resourcePackage = "";
+  protected String folderPackage = "";
+  protected String packageDir = "";
+  protected String resourceSubPackage = "";
   protected String apiSubPackage = "";
   protected String apiCategory = "";
   protected HashMap<String, String> resourceConfigConstantFieldExceptions = new HashMap<String, String>();
@@ -84,6 +86,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 
     // Set the resonse class that should be returned from factory
     CodegenModelFactory.setTypeMapping(CodegenModelType.RESPONSE, TriagePhpCodegenResponse.class);
+    CodegenModelFactory.setTypeMapping(CodegenModelType.OPERATION, TriagePhpCodegenOperation.class);
 
     // Create a list of exceptions for constant naming
     resourceConfigConstantFieldExceptions.put("__v", "version");
@@ -126,16 +129,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
      */
     templateDir = "TriagePhp";
 
-    resourcePackage = "a24group\\Resource";
-    modelCategory = "a24group";
-    modelPackage = "a24group\\Model";
-    apiCategory = "a24group";
-    apiPackage = "a24group\\Model";
-    apiSubPackage = "a24group\\Model\\EndPoints";
-    exceptionCategory = "a24group";
-    exceptionPackage = "a24group\\Model";
-    exceptionSubPackage = "a24group\\Model\\Exception";
-
     // ref: http://php.net/manual/en/language.types.intro.php
     languageSpecificPrimitives = new HashSet<String>(
         Arrays.asList(
@@ -156,7 +149,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
             "self::DATA_TYPE_STRING",
             "self::DATA_TYPE_BOOLEAN",
             "self::DATA_TYPE_FLOAT",
-            "null"
+            "null" // TODO Can this still be removed?
         )
     );
 
@@ -201,26 +194,63 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
      * These properties are set for all fields. Its not a per file system.
      */
     additionalProperties.put("apiVersion", apiVersion);
-    additionalProperties.put("modelCategory", modelCategory);
-    additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
-    additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage);
-    additionalProperties.put("apiCategory", apiCategory);
-    additionalProperties.put("apiSubPackage", apiSubPackage);
-    additionalProperties.put("resourcePackage", resourcePackage);
-    additionalProperties.put("exceptionCategory", exceptionCategory);
-    additionalProperties.put("exceptionPackage", exceptionPackage);
-    additionalProperties.put("exceptionSubPackage", exceptionSubPackage);
     additionalProperties.put("author", AUTHOR);
     additionalProperties.put("initialCaps", new InitialCapsLambda());
 
-    /**
-     * Supporting Files.  You can write single files for the generator with the
-     * entire object tree available.  If the input file has a suffix of `.mustache
-     * it will be processed by the template engine.  Otherwise, it will be copied
-     */
-    supportingFiles.add(new SupportingFile("driver.mustache", "Model", "Driver.php"));
-    supportingFiles.add(new SupportingFile("client.mustache", "Model", "Client.php"));
-    supportingFiles.add(new SupportingFile("runtime_exception.mustache", "Model\\Exception", "RuntimeException.php"));
+    // TODO How does this work
+//    cliOptions.add(new CliOption("moduleName", "Name of the module"));
+//    cliOptions.add(new CliOption("driverName", "Name of the driver the files will be generated to"));
+  }
+
+  @Override
+  public void processOpts() {
+      super.processOpts();
+
+      if (additionalProperties.containsKey("folderPackage")) {
+          folderPackage = (String) additionalProperties.get("folderPackage");
+      }
+      if (additionalProperties.containsKey("driverName")) {
+          driverName = (String) additionalProperties.get("driverName");
+      }
+      moduleName = getModuleNameFromPackage(folderPackage);
+      packageDir = packageToDirName(folderPackage);
+      modelDirName = packageDir + "//" + driverName + "//Resource";
+      apiDirName = packageDir + "//" + driverName + "//EndPoint";
+
+      /**
+       * Supporting Files.  You can write single files for the generator with the
+       * entire object tree available.  If the input file has a suffix of `.mustache
+       * it will be processed by the template engine.  Otherwise, it will be copied
+       */
+      supportingFiles.add(new SupportingFile("driver.mustache", packageDir + "//" + driverName, driverName + "Driver.php"));
+      supportingFiles.add(new SupportingFile("client.mustache", packageDir + "//" + driverName, driverName + "Client.php"));
+
+      resourcePackage = folderPackage;
+      resourceSubPackage = resourcePackage + "\\" + driverName + "\\Resource";
+      modelPackage = resourcePackage;
+      modelSubPackage = resourcePackage + "\\" + driverName;
+      apiCategory = moduleName;
+      apiPackage = resourcePackage;
+      apiSubPackage = resourcePackage + "\\" + driverName + "\\EndPoint";
+
+      additionalProperties.put("moduleName", moduleName);
+      additionalProperties.put("folderPackage", folderPackage);
+      additionalProperties.put(CodegenConstants.MODEL_PACKAGE, modelPackage);
+      additionalProperties.put("modelSubPackage", modelSubPackage);
+      additionalProperties.put(CodegenConstants.API_PACKAGE, apiPackage);
+      additionalProperties.put("apiCategory", apiCategory);
+      additionalProperties.put("apiSubPackage", apiSubPackage);
+      additionalProperties.put("resourcePackage", resourcePackage);
+      additionalProperties.put("resourceSubPackage", resourceSubPackage);
+  }
+
+  protected String getModuleNameFromPackage(String packagePath) {
+      return packagePath.substring(0, packagePath.indexOf("\\"));
+  }
+
+  protected String packageToDirName(String folderDir) {
+      String clone = folderDir;
+      return clone.replace("\\", "//");
   }
 
   @Override
@@ -366,18 +396,30 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions, Swagger swagger) {
       CodegenOperation co = super.fromOperation(path, httpMethod, operation, definitions, swagger);
       co.imports.clear();
-      blah(co);
-      return co;
+      addResourceImport(co);
+
+      TriagePhpCodegenOperation tr = (TriagePhpCodegenOperation) co;
+      tr.isGetList = false;
+
+      int lastSlashIndex = co.path.lastIndexOf("/");
+      int lastCurlyBraceIndex = co.path.lastIndexOf("}");
+
+      if (co.httpMethod.equals("GET") && lastCurlyBraceIndex < lastSlashIndex) {
+          tr.isGetList = true;
+      } else if (co.httpMethod.equals("GET")) {
+          tr.isGet = true;
+      }
+      return tr;
   }
 
-  public void blah(CodegenOperation operation) {
+  public void addResourceImport(CodegenOperation operation) {
       for (CodegenResponse response: operation.responses) {
           if (
               response.baseType != null &&
               !defaultIncludes.contains(response.baseType) &&
               !languageSpecificPrimitives.contains(response.baseType)
           ) {
-              operation.imports.add(resourcePackage + "\\" + response.baseType);
+              operation.imports.add(resourceSubPackage + "\\" + response.baseType);
           }
       }
   }
@@ -410,4 +452,5 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 
       public abstract String initialCaps(String value);
   }
+
 }

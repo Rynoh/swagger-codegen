@@ -5,32 +5,33 @@
  * This is a generated class, as this class gets updated as our application needs to add functionality.
  * An example of this is the ability to pass another VO to a particular method and have it transformed.
  *
- * @category {{modelCategory}}
- * @package  {{modelPackage}}
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
 
 /**
  * @namespace
  */
-namespace {{modelPackage}};
+namespace {{modelSubPackage}};
 
-use {{modelPackage}}\AbstractEndPoint;
+use TriCore\Driver\EndPoint\AbstractEndPoint;
 use TriStudio\Resource\AbstractVariableObject;
-use {{modelPackage}}\Client;
 
 /**
  * Driver which will transfer our application configuration into the required data for module
  *
- * @category {{modelCategory}}
- * @package  {{modelPackage}}
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
-class Driver extends Client
+class {{driverName}}Driver extends {{driverName}}Client
 {
 
     /**
@@ -41,16 +42,16 @@ class Driver extends Client
      * @author {{{author}}}
      * @since  23 May 2016
      *
-     * @throws \{{exceptionSubPackage}}\RuntimeException When driver configuration is invalid
+     * @throws \TriCore\Driver\Exception\RuntimeException When driver configuration is invalid
      *
      * @return void
      */
     public function __construct(array $arrConfig)
     {
         if (!array_key_exists('url', $arrConfig) || !array_key_exists('port', $arrConfig)) {
-            throw new \{{exceptionSubPackage}}\RuntimeException(
-                'Pat Driver details incorrectly configured:' . json_encode($arrConfig),
-                \{{exceptionSubPackage}}\RuntimeException::UNEXPECTED_DRIVER_CONFIGURATION
+            throw new \TriCore\Driver\Exception\RuntimeException(
+                '{{driverName}}Driver details incorrectly configured:' . json_encode($arrConfig),
+                \TriCore\Driver\Exception\RuntimeException::UNEXPECTED_DRIVER_CONFIGURATION
             );
         }
 

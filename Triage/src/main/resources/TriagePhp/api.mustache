@@ -15,7 +15,7 @@
  */
 namespace {{apiSubPackage}};
 
-use {{apiPackage}}\AbstractEndPoint;
+use TriCore\Driver\EndPoint\AbstractEndPoint;
 {{#imports}}
 use {{import}}VO;
 {{/imports}}
@@ -30,7 +30,7 @@ use {{import}}VO;
  * @author     {{{author}}}
  * @since      23 May 2016
  */
-class {{classname}}Endpoint extends AbstractEndPoint
+class {{classname}}EndPoint extends AbstractEndPoint
 {
 
     /**
@@ -57,6 +57,16 @@ class {{classname}}Endpoint extends AbstractEndPoint
 
     {{#operations}}
     {{#operation}}
+    /**
+     * TODO THIS DESCRIPTION SHOULD COME FROM SWAGGER
+     *
+     * The response will be handled by this function in the form of a success VO or an exception with errors.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return \TriStudio\Resource\AbstractVariableObject The response
+     */
     public function {{operationId}}()
     {
         {{#pathParams}}
@@ -84,7 +94,7 @@ class {{classname}}Endpoint extends AbstractEndPoint
             {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
                 $objVO = $objVoFromStdClass->populate(new {{baseType}}VO(), $objBody);
                 {{^isSuccess}}
-                $objExceptionVO = new \{{exceptionSubPackage}}\RuntimeException();
+                $objExceptionVO = new \TriCore\Driver\Exception\RuntimeException();
                 $objExceptionVO->setErrorObject($objVO);
                 throw $objExceptionVO;
                 {{/isSuccess}}

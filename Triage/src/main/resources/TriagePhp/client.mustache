@@ -2,17 +2,18 @@
 /**
  * Contains the Client class.
  *
- * @category {{modelCategory}}
- * @package  {{modelPackage}}
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
 
 /**
  * @namespace
  */
-namespace {{modelPackage}};
+namespace {{modelSubPackage}};
 
 use TriStudio\Resource\AbstractVariableObject;
 use TriStudio\ServiceManager\AbstractServiceManagerAwareBase;
@@ -21,7 +22,7 @@ use TriStudio\ServiceManager\AbstractServiceManagerAwareBase;
 {{#operations}}
 {{#operation}}
 {{#bodyParams}}
-use {{resourcePackage}}\{{baseType}}VO;
+use {{resourceSubPackage}}\{{baseType}}VO;
 {{/bodyParams}}
 {{/operation}}
 {{/operations}}
@@ -31,13 +32,14 @@ use {{resourcePackage}}\{{baseType}}VO;
 /**
  * The client that will deal with setting the configuration onto the end points before making the service call
  *
- * @category {{modelCategory}}
- * @package  {{modelPackage}}
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
-class Client extends AbstractServiceManagerAwareBase
+class {{driverName}}Client extends AbstractServiceManagerAwareBase
 {
 
     /**
@@ -77,12 +79,38 @@ class Client extends AbstractServiceManagerAwareBase
     /**
      * Will make the required call to the {{classname}}Endpoint
      *
+     {{#hasParams}}
+     {{#pathParams}}
+     * @param string ${{baseName}} - {{description}}
+     {{/pathParams}}
+     {{/hasParams}}
+     {{#isGetList}}
+     * @param array $arrQueryParams - (Optional) Any query params to filter
+     {{/isGetList}}
+     {{^isGetList}}
+     {{^isGet}}
+     * @param \TriStudio\Resource\AbstractVariableObject $objVo - The payload VO
+     {{/isGet}}
+     {{/isGetList}}
+     *
      * @author {{{author}}}
      * @since  23 May 2016
      *
+     * @throws \TriCore\Driver\Exception\RuntimeException Throw exception if the VO type is wrong
+     *
      * @return \TriStudio\Resource\AbstractVariableObject The response VO
      */
-    public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}, {{/required}}{{/pathParams}}{{/hasParams}}AbstractVariableObject $objVo)
+    {{#isGet}}
+    public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}{{^-last}}, {{/-last}}{{/required}}{{/pathParams}}{{/hasParams}})
+    {{/isGet}}
+    {{#isGetList}}
+    public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}{{^-last}}, {{/-last}}{{/required}}{{/pathParams}}{{/hasParams}}$arrQueryParams = array())
+    {{/isGetList}}
+    {{^isGetList}}
+    {{^isGet}}
+    public function {{operationId}}({{#hasParams}}{{#pathParams}}{{#required}}${{baseName}}{{^-last}}, {{/-last}}{{/required}}{{/pathParams}}{{/hasParams}}AbstractVariableObject $objVo)
+    {{/isGet}}
+    {{/isGetList}}
     {
         {{#bodyParams}}
         if (!$objVo instanceof {{#initialCaps}}{{baseType}}{{/initialCaps}}VO) {
@@ -92,28 +120,34 @@ class Client extends AbstractServiceManagerAwareBase
                 get_class($objVo),
                 get_class($this)
             );
-            throw new \{{exceptionSubPackage}}\RuntimeException(
+            throw new \TriCore\Driver\Exception\RuntimeException(
                 $sMessage,
-                \{{exceptionSubPackage}}\RuntimeException::UNEXPECTED_ENDPOINT_PAYLOAD_PARAM
+                \TriCore\Driver\Exception\RuntimeException::UNEXPECTED_ENDPOINT_PAYLOAD_PARAM
             );
         }
         {{/bodyParams}}
-
         {{^hasParams}}
         $arrParams = array();
         {{/hasParams}}
         {{#hasParams}}
         $arrParams = array(
-            {{#pathParams}}
+        {{#pathParams}}
             '{{baseName}}' => ${{baseName}}{{^-last}},{{/-last}}
-            {{/pathParams}}
+        {{/pathParams}}
         );
         {{/hasParams}}
-        /** @var {{modelPackage}}\{{classname}}Endpoint $objEndpoint */
+        /** @var \{{modelPackage}}\{{classname}}Endpoint $objEndpoint */
         $objEndpoint = $this->getServiceManager()->get('{{classname}}Endpoint');
         $objEndpoint->setConfig($this->arrConfig);
         $objEndpoint->setParams($arrParams);
+        {{^isGetList}}
+        {{^isGet}}
         $objEndpoint->setPayload($objVo);
+        {{/isGet}}
+        {{/isGetList}}
+        {{#isGetList}}
+        $objEndpoint->setQueryParams($arrQueryParams);
+        {{/isGetList}}
         return $objEndpoint->{{operationId}}();
     }
 

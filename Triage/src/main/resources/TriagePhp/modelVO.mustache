@@ -4,28 +4,30 @@
 /**
  * Contains the {{classname}}VO class.
  *
- * @category {{resourcePackage}};
- * @package  {{resourcePackage}};
+ * @category   {{moduleName}}
+ * @package    {{resourcePackage}}
+ * @subpackage {{resourceSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
 
 /**
  * @namespace
  */
-namespace {{resourcePackage}};
+namespace {{resourceSubPackage}};
 
 use TriStudio\Resource\AbstractVariableObject;
 
 /**
  * Contains the {{classname}}VO class.
  *
- * @category {{resourcePackage}};
- * @package  {{resourcePackage}};
+ * @category   {{moduleName}}
+ * @package    {{resourcePackage}}
+ * @subpackage {{resourceSubPackage}}
  *
- * @author   {{{author}}}
- * @since    23 May 2016
+ * @author     {{{author}}}
+ * @since      23 May 2016
  */
 class {{classname}}VO extends AbstractVariableObject
 {
@@ -44,7 +46,7 @@ class {{classname}}VO extends AbstractVariableObject
      *
      * @var string
      */
-    protected static $sResourceConfigClassName = '{{modelPackage}}\{{classname}}ResourceConfig';
+    protected static $sResourceConfigClassName = '{{resourceSubPackage}}\{{classname}}ResourceConfig';
 
     /**
      * Set allowed properties for this VO.
