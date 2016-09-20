@@ -58,29 +58,24 @@ class {{classname}}EndPoint extends AbstractEndPoint
     {{#operations}}
     {{#operation}}
     /**
-     * TODO THIS DESCRIPTION SHOULD COME FROM SWAGGER
+     * Replace url params and make an external request.
      *
      * The response will be handled by this function in the form of a success VO or an exception with errors.
      *
      * @author {{{author}}}
      * @since  {{currentDate}}
      *
+     * @throws \TriCore\Driver\Exception\RuntimeException - If there is an error
+     *
      * @return \TriStudio\Resource\AbstractVariableObject The response
      */
     public function {{operationId}}()
     {
-        {{#pathParams}}
-        {{#-last}}
-        $sUrl = $this->replacePathToken(
+        $sUrl = $this->prepareUrlForQueryParams(
             '{{path}}',
             $this->arrParams
         );
         $sUrl = $this->getAbsoluteUri($sUrl);
-        {{/-last}}
-        {{/pathParams}}
-        {{^pathParams}}
-        $sUrl = $this->getAbsoluteUri('{{path}}');
-        {{/pathParams}}
 
         $objResponse = $this->send($sUrl, \Zend\Http\Request::METHOD_{{httpMethod}});
 

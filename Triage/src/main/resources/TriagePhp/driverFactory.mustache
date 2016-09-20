@@ -4,7 +4,7 @@
  *
  * @category   {{moduleName}}
  * @package    {{modelPackage}}
- * @subpackage {{modelSubPackage}}
+ * @subpackage {{modelSubPackage}}\Service\Factory
  *
  * @author     {{{author}}}
  * @since      {{currentDate}}
@@ -13,7 +13,7 @@
 /**
  * @namespace
  */
-namespace {{modelSubPackage}};
+namespace {{modelSubPackage}}\Service\Factory;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\FactoryInterface;
@@ -24,12 +24,12 @@ use {{modelSubPackage}}\{{driverName}}Driver;
  *
  * @category   {{moduleName}}
  * @package    {{modelPackage}}
- * @subpackage {{modelSubPackage}}
+ * @subpackage {{modelSubPackage}}\Service\Factory
  *
  * @author     {{{author}}}
  * @since      {{currentDate}}
  */
-class {{driverName}}FactoryDriver implements FactoryInterface
+class {{driverName}}DriverFactory implements FactoryInterface
 {
 
     /**
