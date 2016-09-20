@@ -22,7 +22,10 @@ import io.swagger.util.Json;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -267,6 +270,8 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       additionalProperties.put("modelTestPackage", modelTestPackage);
       additionalProperties.put("modelTestSubPackage", modelTestSubPackage);
       additionalProperties.put("modelTestCategory", modelTestCategory);
+      additionalProperties.put("currentDate", getCurrentDate());
+
   }
 
   /**
@@ -278,6 +283,19 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   @Override
   public String toModelTestFilename(String name) {
       return initialCaps(name);
+  }
+
+  /**
+   * Get the current date in the format of 'dd MMM yyyy'
+   *
+   * This is used for the @since tag
+   *
+   * @return The date in format '01 Sep 2016'
+   */
+  public String getCurrentDate() {
+      DateFormat df = new SimpleDateFormat("dd MMM yyyy");
+      Date dateobj = new Date();
+      return df.format(dateobj);
   }
 
   /**
