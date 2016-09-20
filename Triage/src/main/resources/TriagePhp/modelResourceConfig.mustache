@@ -52,7 +52,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
      * @var string
      */
     {{#vars}}
-    const FIELD_{{name.toUpperCase}} = '{{baseName}}';
+    const FIELD_{{uppercaseName}} = '{{baseName}}';
     {{/vars}}
     /**#@-*/
     {{#vars}}
@@ -91,7 +91,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
         );
         {{#vars}}
         $this->addPropertyConfig(
-            self::FIELD_{{name.toUpperCase}},
+            self::FIELD_{{uppercaseName}},
             array(
                 {{^isContainer}}
                 {{^isPrimitiveType}}
@@ -114,7 +114,7 @@ class {{classname}}ResourceConfig extends AbstractResourceConfig
                 {{/isPrimitiveType}}
                 {{/items}}
                 {{/isContainer}}
-                self::CONFIG_SHORT_NAME => self::FIELD_{{name.toUpperCase}},
+                self::CONFIG_SHORT_NAME => self::FIELD_{{uppercaseName}},
                 {{#isInteger}}
                 {{#minimum}}
                 {{#maximum}}

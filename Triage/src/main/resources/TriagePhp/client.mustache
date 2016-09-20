@@ -136,7 +136,7 @@ class {{driverName}}Client extends AbstractServiceManagerAwareBase
         {{/pathParams}}
         );
         {{/hasParams}}
-        /** @var \{{modelPackage}}\{{classname}}Endpoint $objEndpoint */
+        /** @var \{{apiSubPackage}}\{{classname}}Endpoint $objEndpoint */
         $objEndpoint = $this->getServiceManager()->get('{{classname}}Endpoint');
         $objEndpoint->setConfig($this->arrConfig);
         $objEndpoint->setParams($arrParams);

@@ -1,0 +1,54 @@
+<?php
+/**
+ * Contains the {{driverName}} DriverFactory class.
+ *
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+
+/**
+ * @namespace
+ */
+namespace {{modelSubPackage}};
+
+use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\FactoryInterface;
+use {{modelSubPackage}}\{{driverName}}Driver;
+
+/**
+ * Contains the {{driverName}} DriverFactory class.
+ *
+ * @category   {{moduleName}}
+ * @package    {{modelPackage}}
+ * @subpackage {{modelSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+class {{driverName}}FactoryDriver implements FactoryInterface
+{
+
+    /**
+     * Creates a driver instance using config info.
+     *
+     * @param \Zend\ServiceManager\ServiceLocatorInterface $objServiceLocator - The service locator
+     *     used to retrieve data from the SM
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @return \{{modelSubPackage}}\{{driverName}}Driver - an instance of the {{driverName}}Driver
+     */
+    public function createService(ServiceLocatorInterface $objServiceLocator)
+    {
+        $arrConfig = $objServiceLocator->get('config');
+
+        // TODO Add the correct config key
+        return new {{driverName}}Driver($arrConfig['add-config-key']);
+    }
+
+}

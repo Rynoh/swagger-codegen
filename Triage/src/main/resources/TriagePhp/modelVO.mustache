@@ -60,7 +60,7 @@ class {{classname}}VO extends AbstractVariableObject
         {{^isPrimitiveType}}
         {{^isContainer}}
         $this->addProperty(
-            {{classname}}ResourceConfig::FIELD_{{name.toUpperCase}},
+            {{classname}}ResourceConfig::FIELD_{{uppercaseName}},
             array(
                 AbstractVariableObject::OPTION_VO_NAME => {{datatype}}VO::getClass()
             )
@@ -68,7 +68,7 @@ class {{classname}}VO extends AbstractVariableObject
         {{/isContainer}}
         {{#isContainer}}
         $this->addProperty(
-            {{classname}}ResourceConfig::FIELD_{{name.toUpperCase}},
+            {{classname}}ResourceConfig::FIELD_{{uppercaseName}},
             array(
                 AbstractVariableObject::OPTION_VO_NAME => {{#items}}{{datatype}}{{/items}}VO::getClass()
             )
@@ -76,7 +76,7 @@ class {{classname}}VO extends AbstractVariableObject
         {{/isContainer}}
         {{/isPrimitiveType}}
         {{#isPrimitiveType}}
-        $this->addProperty({{classname}}ResourceConfig::FIELD_{{name.toUpperCase}});
+        $this->addProperty({{classname}}ResourceConfig::FIELD_{{uppercaseName}});
         {{/isPrimitiveType}}
         {{/vars}}
     }

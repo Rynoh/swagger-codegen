@@ -49,6 +49,9 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   protected String resourceSubPackage = "";
   protected String apiSubPackage = "";
   protected String apiCategory = "";
+  protected String modelTestCategory = "";
+  protected String modelTestPackage = "";
+  protected String modelTestSubPackage = "";
   protected HashMap<String, String> resourceConfigConstantFieldExceptions = new HashMap<String, String>();
 
   /**
@@ -81,12 +84,22 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     return "Generates a TriagePhp client library.";
   }
 
+  /**
+   * Default constructor.
+   * This method will map between Swagger type and language-specified type, as well as mapping
+   * between Swagger type and the corresponding import statement for the language. This will
+   * also add some language specified CLI options, if any.
+   *
+   *
+   * returns string presentation of the example path (it's a constructor)
+   */
   public TriagephpGenerator() {
     super();
 
     // Set the resonse class that should be returned from factory
     CodegenModelFactory.setTypeMapping(CodegenModelType.RESPONSE, TriagePhpCodegenResponse.class);
     CodegenModelFactory.setTypeMapping(CodegenModelType.OPERATION, TriagePhpCodegenOperation.class);
+    CodegenModelFactory.setTypeMapping(CodegenModelType.PROPERTY, TriagePhpCodegenProperty.class);
 
     // Create a list of exceptions for constant naming
     resourceConfigConstantFieldExceptions.put("__v", "version");
@@ -112,6 +125,8 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
         "modelVO.mustache",
         "VO.php"
     );
+
+    modelTestTemplateFiles.put("modelVOTest.mustache", "VOTest.php");
 
     /**
      * Api classes.  You can write classes for each Api file with the apiTemplateFiles map.
@@ -196,12 +211,13 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     additionalProperties.put("apiVersion", apiVersion);
     additionalProperties.put("author", AUTHOR);
     additionalProperties.put("initialCaps", new InitialCapsLambda());
-
-    // TODO How does this work
-//    cliOptions.add(new CliOption("moduleName", "Name of the module"));
-//    cliOptions.add(new CliOption("driverName", "Name of the driver the files will be generated to"));
   }
 
+  /**
+   * Process options and add them to additional properties.
+   *
+   * Additional properties is available on all templates
+   */
   @Override
   public void processOpts() {
       super.processOpts();
@@ -224,6 +240,9 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
        */
       supportingFiles.add(new SupportingFile("driver.mustache", packageDir + "//" + driverName, driverName + "Driver.php"));
       supportingFiles.add(new SupportingFile("client.mustache", packageDir + "//" + driverName, driverName + "Client.php"));
+      supportingFiles.add(
+          new SupportingFile("driverFactory.mustache", packageDir + "//" + driverName + "//Service//Factory", driverName + "DriverFactory.php")
+      );
 
       resourcePackage = folderPackage;
       resourceSubPackage = resourcePackage + "\\" + driverName + "\\Resource";
@@ -232,6 +251,9 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       apiCategory = moduleName;
       apiPackage = resourcePackage;
       apiSubPackage = resourcePackage + "\\" + driverName + "\\EndPoint";
+      modelTestCategory = moduleName + "Test";
+      modelTestPackage = toModelTestPackage(resourcePackage);
+      modelTestSubPackage = modelTestPackage + "\\" + driverName + "\\Resource";
 
       additionalProperties.put("moduleName", moduleName);
       additionalProperties.put("folderPackage", folderPackage);
@@ -242,17 +264,68 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       additionalProperties.put("apiSubPackage", apiSubPackage);
       additionalProperties.put("resourcePackage", resourcePackage);
       additionalProperties.put("resourceSubPackage", resourceSubPackage);
+      additionalProperties.put("modelTestPackage", modelTestPackage);
+      additionalProperties.put("modelTestSubPackage", modelTestSubPackage);
+      additionalProperties.put("modelTestCategory", modelTestCategory);
   }
 
+  /**
+   * Return the capitalized file name of the model test
+   *
+   * @param name the model name
+   * @return the file name of the model
+   */
+  @Override
+  public String toModelTestFilename(String name) {
+      return initialCaps(name);
+  }
+
+  /**
+   * Convert the package to a test package by adding 'Test' to the module name
+   *
+   * @param packagePath - The package that needs to be changed to test package
+   *
+   * @return The changed package
+   */
+  protected String toModelTestPackage(String packagePath) {
+      String testPackage = packagePath.substring(0, packagePath.indexOf("\\"));
+      testPackage += "Test\\" + packagePath.substring(packagePath.indexOf("\\") + 1);
+      return testPackage;
+  }
+
+  /**
+   * Get the module name from a given package
+   *
+   * Module name will be everything before the first '\'
+   *
+   * @param packagePath - The package that needs to be changed to test package
+   *
+   * @return The module name
+   */
   protected String getModuleNameFromPackage(String packagePath) {
       return packagePath.substring(0, packagePath.indexOf("\\"));
   }
 
-  protected String packageToDirName(String folderDir) {
-      String clone = folderDir;
+  /**
+   * Convert the package into a folder structure
+   *
+   * Replace '\' with '/'
+   *
+   * @param packagePath - The package that needs to be changed into a dir structure
+   *
+   * @return The dir structure
+   */
+  protected String packageToDirName(String packagePath) {
+      String clone = packagePath;
       return clone.replace("\\", "//");
   }
 
+  /**
+   * Return the file name of the Api Test
+   *
+   * @param name the file name of the Api
+   * @return the file name of the Api
+   */
   @Override
   public String apiFilename(String templateName, String tag) {
       String suffix = apiTemplateFiles().get(templateName);
@@ -266,6 +339,15 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
   @Override
   public String modelFileFolder() {
       return (outputFolder + "/" + modelDirName);
+  }
+
+  /**
+   * Location to write model files.  You can use the modelPackage() as defined when the class is
+   * instantiated
+   */
+  @Override
+  public String modelTestFileFolder() {
+      return (outputFolder + "//Test//" + packageDir + "//" + driverName + "//Resource");
   }
 
   /**
@@ -318,6 +400,14 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
     return type;
   }
 
+  /**
+   * Update property for array(list) container
+   *
+   * Override the parent function in order to set the 'isPrimitiveType' on the inner property as well
+   *
+   * @param property Codegen property
+   * @param innerProperty Codegen inner property of map or list
+   */
   @Override
   protected void updatePropertyForArray(CodegenProperty property, CodegenProperty innerProperty) {
       if (innerProperty == null) {
@@ -329,7 +419,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
                   for (String key: typeNames) {
                     if (typeMapping.get(key).equals(innerProperty.baseType)) {
                         property.isPrimitiveType = false;
-                        // TODO Added inner type isPrimitiveType
                         innerProperty.isPrimitiveType = true;
                     }
                 }
@@ -412,6 +501,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       return tr;
   }
 
+  /**
+   * Configure import paths for model(The VO and RC) files
+   *
+   * @param operation - The current operation
+   */
   public void addResourceImport(CodegenOperation operation) {
       for (CodegenResponse response: operation.responses) {
           if (
@@ -435,6 +529,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       return name;
   }
 
+  /**
+   * Class that is used by a lambda to convert any value to initial caps.
+   *
+   * Change 'hello' into 'Hello'
+   */
   private static class InitialCapsLambda extends TriageCustomLambda {
       @Override
       public String initialCaps(String value) {
@@ -442,6 +541,11 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       }
   }
 
+  /**
+   * Custom lambda that can be used to initial caps any value.
+   *
+   * Simply use '{{#initialCaps}}someValue{{/initialCaps}}'
+   */
   private static abstract class TriageCustomLambda implements Mustache.Lambda {
       @Override
       public void execute(Template.Fragment frag, Writer out) throws IOException {
@@ -452,5 +556,23 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 
       public abstract String initialCaps(String value);
   }
+
+    /**
+     * Convert Swagger Property object to Codegen Property object
+     *
+     * @param name name of the property
+     * @param p Swagger property object
+     * @return Codegen Property object
+     */
+    @Override
+    public CodegenProperty fromProperty(String name, Property p) {
+        CodegenProperty cp = super.fromProperty(name, p);
+        TriagePhpCodegenProperty tp = (TriagePhpCodegenProperty) cp;
+        if (resourceConfigConstantFieldExceptions.containsKey(cp.name)) {
+            cp.name = resourceConfigConstantFieldExceptions.get(cp.name);
+        }
+        tp.uppercaseName = cp.name.toUpperCase();
+        return tp;
+    }
 
 }

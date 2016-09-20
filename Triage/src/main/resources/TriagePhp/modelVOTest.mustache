@@ -1,0 +1,105 @@
+<?php
+{{#models}}
+{{#model}}
+/**
+ * Contains the test cases for the {{classname}} variable object.
+ *
+ * @category   {{modelTestCategory}}
+ * @package    {{modelTestPackage}}
+ * @subpackage {{modelTestSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+
+/**
+* @namespace
+*/
+namespace {{modelTestSubPackage}};
+
+use {{resourceSubPackage}}\{{classname}}VO;
+use TriStudioTest\Helpers\Resource\AbstractGenericVOTestCase;
+
+/**
+ * Contains the test cases for the {{classname}} variable object.
+ *
+ * @category   {{modelTestCategory}}
+ * @package    {{modelTestPackage}}
+ * @subpackage {{modelTestSubPackage}}
+ *
+ * @author     {{{author}}}
+ * @since      23 May 2016
+ */
+class {{classname}}VOTest extends AbstractGenericVOTestCase
+{
+
+    /**
+     * Used to return an instance of the {{classname}}VO for testing purposes.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @see TriStudioTest\Helpers\Resource\AbstractGenericVOTestCase::getVOInstance()
+     *
+     * @return \{{resourceSubPackage}}\{{classname}}VO An instance of the vo to test
+     */
+    public function getVoInstance()
+    {
+        return new {{classname}}VO();
+    }
+
+    /**
+     * Test that the correct resource config is returned by the get resource config method.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @covers {{resourceSubPackage}}\{{classname}}VO::getResourceConfig
+     *
+     * @return void
+     */
+    public function testGetResourceConfig()
+    {
+        $sExpectedResourceConfig = '{{resourceSubPackage}}\{{classname}}ResourceConfig';
+
+        $objVo = $this->getVoInstance();
+
+        $this->assertInstanceOf(
+            $sExpectedResourceConfig,
+            $objVo->getResourceConfig(),
+            sprintf(
+                'Incorrect object returned by get resource config method, excepted "%s".',
+                $sExpectedResourceConfig
+            )
+        );
+    }
+
+    /**
+     * Test that the correct properties are returned by the get properties method.
+     *
+     * @author {{{author}}}
+     * @since  23 May 2016
+     *
+     * @covers {{resourceSubPackage}}\{{classname}}VO::getProperties
+     *
+     * @return void
+     */
+    public function testGetProperties()
+    {
+        $arrExpectedProperties = array(
+            {{#vars}}
+            '{{name}}'{{^-last}},{{/-last}}
+            {{/vars}}
+        );
+
+        $objVo = $this->getVoInstance();
+        $this->assertEquals(
+            $arrExpectedProperties,
+            $objVo->getProperties(),
+            'Incorrect properties returned by the get properties method'
+        );
+    }
+
+}
+{{/model}}
+{{/models}}
