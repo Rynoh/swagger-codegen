@@ -16,6 +16,7 @@
 namespace {{apiSubPackage}};
 
 use TriCore\Driver\EndPoint\AbstractEndPoint;
+use TriStudio\Resource\VariableObjectIterator;
 {{#imports}}
 use {{import}}VO;
 {{/imports}}
@@ -89,7 +90,12 @@ class {{classname}}EndPoint extends AbstractEndPoint
                 $objVO = $objVoFromStdClass->populate(new {{baseType}}VO(), $objBody);
                 {{/isGetList}}
                 {{#isGetList}}
-                $objVO = $this->transformGetListResponse($objBody, PluginDisplayVO::getClass());
+                {{#isNoContent}}
+                return new VariableObjectIterator(array(), 0);
+                {{/isNoContent}}
+                {{^isNoContent}}
+                $objVO = $this->transformGetListResponse($objBody, {{baseType}}VO::getClass());
+                {{/isNoContent}}
                 {{/isGetList}}
                 {{/isSuccess}}
                 {{^isSuccess}}

@@ -480,10 +480,15 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
       // Used to determine whether the response is a success or not. This way
       // you can decide to error or return the success response
       tr.isSuccess = false;
+      tr.isNoContent = false;
       if (!responseCode.equals("default")) {
           int statusCode = Integer.parseInt(responseCode);
           if (statusCode >= 200 && statusCode < 300) {
               tr.isSuccess = true;
+          }
+
+          if (statusCode == 204) {
+              tr.isNoContent = true;
           }
       }
       return tr;
@@ -507,7 +512,6 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
 
       TriagePhpCodegenOperation tr = (TriagePhpCodegenOperation) co;
       tr.isGetList = false;
-
       int lastSlashIndex = co.path.lastIndexOf("/");
       int lastCurlyBraceIndex = co.path.lastIndexOf("}");
 
@@ -531,6 +535,7 @@ public class TriagephpGenerator extends DefaultCodegen implements CodegenConfig 
               !defaultIncludes.contains(response.baseType) &&
               !languageSpecificPrimitives.contains(response.baseType)
           ) {
+              System.out.println(operation.operationId + ":" + response.dataType);
               operation.imports.add(resourceSubPackage + "\\" + response.baseType);
           }
       }
