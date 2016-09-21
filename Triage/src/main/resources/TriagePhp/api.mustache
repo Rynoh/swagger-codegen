@@ -71,12 +71,10 @@ class {{classname}}EndPoint extends AbstractEndPoint
      */
     public function {{operationId}}()
     {
-        $sUrl = $this->prepareUrlForQueryParams(
+        $sUrl = $this->prepareUrl(
             '{{path}}',
             $this->arrParams
         );
-        $sUrl = $this->getAbsoluteUri($sUrl);
-
         $objResponse = $this->send($sUrl, \Zend\Http\Request::METHOD_{{httpMethod}});
 
         $objBody = json_decode($objResponse->getBody());
@@ -85,16 +83,22 @@ class {{classname}}EndPoint extends AbstractEndPoint
         $objVoFromStdClass = $this->getServiceManager()->get('VariableObjectFromStdClass');
         switch ($objResponse->getStatusCode()) {
             {{#responses}}
-            {{#dataType}}
             {{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
+                {{#isSuccess}}
+                {{^isGetList}}
                 $objVO = $objVoFromStdClass->populate(new {{baseType}}VO(), $objBody);
+                {{/isGetList}}
+                {{#isGetList}}
+                $objVO = $this->transformGetListResponse($objBody, PluginDisplayVO::getClass());
+                {{/isGetList}}
+                {{/isSuccess}}
                 {{^isSuccess}}
+                $objVO = $objVoFromStdClass->populate(new {{baseType}}VO(), $objBody);
                 $objExceptionVO = new \TriCore\Driver\Exception\RuntimeException();
                 $objExceptionVO->setErrorObject($objVO);
                 throw $objExceptionVO;
                 {{/isSuccess}}
                 break;
-            {{/dataType}}
             {{/responses}}
         }
         return $objVO;
